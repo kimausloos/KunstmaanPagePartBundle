@@ -11,7 +11,7 @@
                 {% set widget = resource.getFormWidget(region.name) %}
                 {% if widget is not null %}
                     {% set pagepartadmin = widget.pagepartadmin %}
-                    {{ pagepartadmin_widget(pagepartadmin, formView) }}
+                    {{ pagepartadmin_widget(pagepartadmin, formView, {'region': region}) }}
                 {% else %}
                     NO ADMIN FOUND for {{ region.name }}
                 {% endif %}

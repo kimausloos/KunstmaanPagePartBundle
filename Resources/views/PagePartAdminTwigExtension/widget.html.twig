@@ -31,7 +31,7 @@
     {% endfor %}
     {% endspaceless %}">
     {% for id, pagepart in pagepartadmin.pagepartmap %}
-		{% include 'KunstmaanPagePartBundle:PagePartAdminTwigExtension:pagepart.html.twig' with { 'id': id, 'pagepartadmin': pagepartadmin, 'editmode': false} %}
+		{% include 'KunstmaanPagePartBundle:PagePartAdminTwigExtension:pagepart.html.twig' with { 'id': id, 'pagepartadmin': pagepartadmin, 'editmode': false, 'region': region} %}
     {% endfor %}
     </div>
 </div>
