@@ -35,6 +35,7 @@ class PagePartAdminController extends Controller
         $pageClassName = $request->get('pageclassname');
         $context = $request->get('context');
         $pagePartClass = $request->get('type');
+        $regionspan = $request->get('regionspan');
 
         $page = $this->em->getRepository($pageClassName)->findOneById($pageId);
 
@@ -73,6 +74,7 @@ class PagePartAdminController extends Controller
                 'form' => $formview,
                 'pagepart' => $pagePart,
                 'pagepartadmin' => $pagePartAdmin,
-                'editmode'=> true);
+                'editmode'=> true,
+                'regionspan' => $regionspan);
     }
 }

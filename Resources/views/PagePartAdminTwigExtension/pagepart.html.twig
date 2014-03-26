@@ -1,5 +1,9 @@
 {% form_theme form 'KunstmaanAdminBundle:Form:fields.html.twig' %}
 {% set context = pagepartadmin.context %}
+{% if regionspan is not defined %}
+    {% set regionspan = region.span %}
+{% endif %}
+
 <input type="checkbox" class="deletefield" id="{{id}}_deleted" name="{{id}}_deleted" value="true" style="display:none"/>
 <section class="draggable" id="{{id}}_container" data-scope="{{ pagepartadmin.getClassName(pagepart)|replace({'\\':""}) }}" >
     {% if pagepart.id == 0 %}
@@ -25,20 +29,21 @@
                     <i class="icon-trash"></i>
                 </button>
                 {% if editable %}
-                    <button class="edit bleu" {% if region.span < 6 %}data-toggle="modal" data-target="#edit-pagepart-modal{{id}}"{% endif %} onclick="return PagePartEditor.editPagepart('{{id}}')">
+                    <button class="edit bleu" {% if regionspan < 6 %}data-toggle="modal" data-target="#edit-pagepart-modal{{id}}"{% endif %} onclick="return PagePartEditor.editPagepart('{{id}}')">
                         <i class="icon-edit"></i>
                     </button>
                 {% endif %}
             </div>
         </div>
 
-        <div class="block clearfix" id="{{id}}_view" {% if region.span < 6 %}style="display: block !important;"{% endif %} {% if editable %}onDblclick="return edit_{{id}}()"{% endif %}>
+        <div class="block clearfix" id="{{id}}_view" {% if regionspan < 6 %}style="display: block !important;"{% endif %} {% if editable %}onDblclick="return edit_{{id}}()"{% endif %}>
             {% include pagepart.adminview with {'resource': pagepart, 'pagepartadmin': pagepartadmin} %}
         </div>
 
         <div class="block clearfix" id="{{id}}_edit" {% if not editmode %}style="display:none"{% endif %}>
             <!-- if pagepart is in a span < 6, show in lightbox -->
-            {% if region.span < 6 %}
+
+            {% if regionspan < 6 %}
                 <div id="edit-pagepart-modal{{id}}" class="modal modal--edit hide fade">
                     <div class="modal-header">
                         <button class="close" data-dismiss="modal">&times;</button>
@@ -59,6 +64,7 @@
                         </div>
                     </div>
                 </div>
+
             <!-- else show in same container -->
             {% else %}
                 {% set pagepartid = 'pagepart'~id %}

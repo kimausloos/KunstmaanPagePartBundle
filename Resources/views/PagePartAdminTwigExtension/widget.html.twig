@@ -15,7 +15,7 @@
 		PagePartEditor = [];
 	}
 </script>
-<div class="pagepartscontainer" data-context="{{pagepartadmin.context}}" data-pageid="{{ pagepartadmin.page.id }}" data-pageclassname="{{ pagepartadmin.getClassName(pagepartadmin.page) }}">
+<div class="pagepartscontainer" data-context="{{pagepartadmin.context}}" data-pageid="{{ pagepartadmin.page.id }}" data-pageclassname="{{ pagepartadmin.getClassName(pagepartadmin.page) }}" data-regionspan="{{region.span}}">
 	<div class="new_pagepart first">
 	  <select onchange="return PagePartEditor.addPagepart(this)" class="addselect">
 	    <option value="">Add a pagepart</option>
@@ -62,7 +62,8 @@
 	            	'pageclassname': pagepartscontainer.data('pageclassname'),
 	            	'pageid': pagepartscontainer.data('pageid'),
 	            	'context': pagepartscontainer.data('context'),
-		            'type': $(select).val()
+		            'type': $(select).val(),
+                    'regionspan': pagepartscontainer.data('regionspan')
 		        },
 	            async: true,
 	            success: function(data) {
@@ -76,6 +77,12 @@
 				    disableCKEditors();
 				    enableCKEditors();
                     initCustomSelect();
+
+                    if( $(select).parent().hasClass('first') && $(select).parent().next().is('#parts_sidebar') ) {
+                        $('select').parent().next('#parts_sidebar').children(':first').next().find('.modal--edit').modal();
+                    } else {
+                        $(select).closest('section').next().next().find('.modal--edit').modal();
+                    }
 	            }
 		    });
 	        $(select).val('');
