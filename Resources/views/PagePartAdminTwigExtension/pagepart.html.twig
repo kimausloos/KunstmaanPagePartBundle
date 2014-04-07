@@ -1,8 +1,5 @@
 {% form_theme form 'KunstmaanAdminBundle:Form:fields.html.twig' %}
 {% set context = pagepartadmin.context %}
-{% if regionspan is not defined %}
-    {% set regionspan = region.span %}
-{% endif %}
 
 <input type="checkbox" class="deletefield" id="{{id}}_deleted" name="{{id}}_deleted" value="true" style="display:none"/>
 <section class="draggable" id="{{id}}_container" data-scope="{{ pagepartadmin.getClassName(pagepart)|replace({'\\':""}) }}" >
@@ -12,7 +9,7 @@
     {% endif %}
     <input type="hidden" name="{{context}}_sequence[]" data-suffix="_sequence[]" class="pagepartadmin_field_updatecontextname" value="{{id}}" />
 
-    <div class="pagepart">
+    <div class="pagepart" id="pagepart_{{ id }}" data-pagepart-type="{{pagepartadmin.getType(pagepart)}}" >
         {% if form_has_errors_recursive(form['pagepartadmin_'~id]) %}
             {% set editmode = true %}
         {% endif %}
@@ -29,53 +26,25 @@
                     <i class="icon-trash"></i>
                 </button>
                 {% if editable %}
-                    <button class="edit bleu" {% if regionspan < 6 %}data-toggle="modal" data-target="#edit-pagepart-modal{{id}}"{% endif %} onclick="return PagePartEditor.editPagepart('{{id}}')">
+                    <button class="edit bleu" id="submit_edit_{{id}}" onclick="return PagePartEditor.editPagepart('{{id}}')">
                         <i class="icon-edit"></i>
                     </button>
                 {% endif %}
             </div>
         </div>
 
-        <div class="block clearfix" id="{{id}}_view" {% if regionspan < 6 %}style="display: block !important;"{% endif %} {% if editable %}onDblclick="return edit_{{id}}()"{% endif %}>
+        <div class="block clearfix" id="{{id}}_view" {% if editable %}onDblclick="return edit_{{id}}()"{% endif %}>
             {% include pagepart.adminview with {'resource': pagepart, 'pagepartadmin': pagepartadmin} %}
         </div>
 
         <div class="block clearfix" id="{{id}}_edit" {% if not editmode %}style="display:none"{% endif %}>
-            <!-- if pagepart is in a span < 6, show in lightbox -->
-
-            {% if regionspan < 6 %}
-                <div id="edit-pagepart-modal{{id}}" class="modal modal--edit hide fade">
-                    <div class="modal-header">
-                        <button class="close" data-dismiss="modal">&times;</button>
-                        <h3>Edit '{{pagepartadmin.getType(pagepart)}}'</h3>
-                    </div>
-                    <div class="modal-body">
-                        {% set pagepartid = 'pagepart'~id %}
-                        {% if pagepart.editTemplate is defined %}
-                            {% include pagepart.editTemplate with {'resource': pagepart, 'pagepartid': pagepartid, 'form': form['pagepartadmin_'~id]} %}
-                        {% else %}
-                            {{ form_widget(form['pagepartadmin_'~id]) }}
-                        {% endif %}
-                    </div>
-                    <div class="modal-footer">
-                        <div class="btn_group">
-                            <button type="button" id="" onclick="$('#edit-pagepart-modal{{id}}').modal('hide');" class="btn btn-primary">Save</button>
-                            <button class="btn" data-dismiss="modal">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-
-            <!-- else show in same container -->
+            {% set pagepartid = 'pagepart'~id %}
+            {% if pagepart.editTemplate is defined %}
+                {% include pagepart.editTemplate with {'resource': pagepart, 'pagepartid': pagepartid, 'form': form['pagepartadmin_'~id]} %}
             {% else %}
-                {% set pagepartid = 'pagepart'~id %}
-                {% if pagepart.editTemplate is defined %}
-                    {% include pagepart.editTemplate with {'resource': pagepart, 'pagepartid': pagepartid, 'form': form['pagepartadmin_'~id]} %}
-                {% else %}
-                    {{ form_widget(form['pagepartadmin_'~id]) }}
-                {% endif %}
+                {{ form_widget(form['pagepartadmin_'~id]) }}
             {% endif %}
         </div>
-
     </div>
 
     <div class="new_pagepart">
@@ -104,3 +73,27 @@
         </div>
     </div>
 </section>
+
+
+{% block extrajavascript %}
+    {% javascripts
+    '@KunstmaanPagePartBundle/Resources/public/js/modalEditor.js'
+    output='generated-js/scripts_bottom.js'
+    %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+<script>
+$(document).ready(function() {
+    // get the pagepart id from twig
+    var id = {{ id }};
+
+    // get the width of the pagepart
+    var width = $('#pagepart_'+id).width();
+    if (width < 500) {
+       useModal(id);
+    }
+
+});
+</script>

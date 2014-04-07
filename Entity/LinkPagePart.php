@@ -93,7 +93,7 @@ class LinkPagePart extends AbstractPagePart
      */
     public function __toString()
     {
-        return "LinkPagePart";
+        return "LinkPagePart " . $this->text;
     }
 
     /**

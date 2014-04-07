@@ -3,3 +3,8 @@ KunstmaanMediaBundle_pagepartadmin:
     type:     annotation
     prefix:   /admin
 
+KunstmaanMediaBundle_ajaxpagepart:
+    resource: "@KunstmaanPagePartBundle/Controller/AjaxPagePartController.php"
+    type:     annotation
+    prefix:   /admin
+
