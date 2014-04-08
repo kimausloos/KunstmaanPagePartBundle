@@ -52,27 +52,25 @@ function renderPagepart(id) {
     var content = {};
     // set the type and add an empty data JSON object
     content.type = pagepartType;
-    content.data = {};
+    content.data = [];
 
-    // This has to be hardcoded: every pagepart has other properties, and somewhere they have to be seperatly added.
-    switch (pagepartType.toLowerCase()) {
-        case 'text':
-            content.data.content = $('#cke_iframe_content').contents().find('.cke_editable').html();
-            break;
+    // get data from normal input fields
+    $('#edit-pagepart-modal'+id+' *:input').each(function(){
+        if ($(this).val()) {
+            content.data.push({
+                name: $(this).attr('id'),
+                value: $(this).val()
+            });
+        }
+    });
 
-        case 'link':
-            content.data.url = $('#form_pagepartadmin_'+id+'_url').val();
-            content.data.openinnewwindow = $('#form_pagepartadmin_'+id+'_openinnewwindow').val();
-            content.data.text = $('#form_pagepartadmin_'+id+'_text').val();
-            break;
-
-        case 'header':
-            content.data.niv = $('#form_pagepartadmin_'+id+'_niv').val();
-            content.data.title = $('#form_pagepartadmin_'+id+'_title').val();
-            break;
-
-        default: // add default behaviour if unknown pagepart?
-            break;
+    // get data from iframe CKE editor
+    var ckeValue = $('#edit-pagepart-modal'+id+' #cke_iframe_content').contents().find('.cke_editable').html()
+    if (ckeValue) {
+        content.data.push({
+            name: 'content',
+            value: ckeValue
+        });
     }
 
     // Create the AJAX request
