@@ -30,7 +30,7 @@ class AjaxPagePartController extends Controller
 
         if (!class_exists($classPath)) {
             $return['responseCode'] = 400;
-            return new JsonResponse(json_encode($return), 200, array('Content-Type' => 'application/json'));
+            return new JsonResponse($return, 200, array('Content-Type' => 'application/json'));
         }
 
         $entity = new $classPath();
@@ -39,7 +39,7 @@ class AjaxPagePartController extends Controller
             $method = 'set' . ucfirst(strtolower($methodName));
             if (!method_exists($entity, $method)) {
                 $return['responseCode'] = 400;
-                return new JsonResponse(json_encode($return), 200, array('Content-Type' => 'application/json'));
+                return new JsonResponse($return, 200, array('Content-Type' => 'application/json'));
             }
 
             $entity->{$method}($value);
