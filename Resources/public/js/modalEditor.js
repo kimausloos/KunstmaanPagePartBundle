@@ -41,20 +41,6 @@ function useModal(id) {
                 + '</div>'
                 + '</div>';
     parent.html(newContent);
-
-    // unused at the moment, need feedback; it can be done with AJAX, so this uses a twig template in stead of the hard-coded HTML above,
-    // but it'll require an AJAX call for each pagepart which uses a modal editor (this can be a lot of calls)
-    /*
-    $.ajax({
-        type: 'POST',
-        url: 'modalEditorPagepart/',
-        data: data,
-        dataType: "html",
-        success: function(response) {
-            parent.html(response);
-        }
-    });
-    */
 }
 
 // This function will take the data from the modal form and make an ajax call to render a pagepart template with the new data.

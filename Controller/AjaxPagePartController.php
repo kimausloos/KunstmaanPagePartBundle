@@ -48,21 +48,4 @@ class AjaxPagePartController extends Controller
 
         return $this->render('KunstmaanPagePartBundle:'.$className.':view.html.twig', $return);
     }
-
-// unused at the moment. Need feedback: should this be done with an AJAX call or just hardcoded in the JS?
-
-    /**
-     * @Route("/nodes/modalEditorPagepart/", name="KunstmaanPagePartBundle_admin_modalEditorPagepart")
-     *
-     * @param Request $request
-     *
-     * @return array
-     */
-    public function modalEditorAction(Request $request) {
-        $content = $request->request->get('content');
-        $id = $request->request->get('id');
-        $pagePartType = $request->request->get('id');
-        return $this->render('KunstmaanPagePartBundle:PagePartAdminTwigExtension:modalEditor.html.twig', array('content' => $content, 'id' => $id, 'pagePartType' => $pagePartType));
-    }
-
 }
