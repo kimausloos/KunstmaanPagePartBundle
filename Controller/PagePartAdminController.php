@@ -74,12 +74,22 @@ class PagePartAdminController extends Controller
         $form = $formBuilder->getForm();
         $formview = $form->createView();
 
-        return array(
+        $twig_data = array(
                 'id'=> $id,
                 'form' => $formview,
                 'pagepart' => $pagePart,
                 'pagepartadmin' => $pagePartAdmin,
                 'editmode'=> true,
-                'regionspan' => $regionspan);
+                'regionspan' => $regionspan
+            );
+
+        $return = array(
+                'html' => $this->renderView('KunstmaanPagePartBundle:PagePartAdminTwigExtension:pagepart.html.twig', $twig_data),
+                'id' => $id
+            );
+
+        return new JsonResponse($return, 200, array('Content-Type' => 'application/json'));
+
+
     }
 }

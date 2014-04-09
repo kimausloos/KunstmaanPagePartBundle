@@ -53,7 +53,7 @@ function useModalEditor(id) {
                 + '</div>'
                 + '<div class="modal-footer">'
                 +    '<div class="btn_group">'
-                +        '<button type="button" id="" onclick="closeModalEditor('+id+')" class="btn btn-primary">Ok</button>'
+                +        '<button type="button" id="" onclick="closeModalEditor(\''+id+'\')" class="btn btn-primary">Ok</button>'
                 +    '</div>'
                 + '</div>'
                 + '</div>';

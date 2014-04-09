@@ -69,9 +69,9 @@
 	            success: function(data) {
 		            var result = null;
 		            if($(select).parent().hasClass('first')) {
-		            	result = $('#parts_'+pagepartscontainer.data('context')).prepend(data);
+                        result = $('#parts_'+pagepartscontainer.data('context')).prepend(data.html);
 			        } else {
-			        	result = $(select).closest('section').after(data);
+			        	result = $(select).closest('section').after(data.html);
 				    }
 				    result.find('.prop_bar').mousedown(PagePartEditor.propBarMouseDownHandler);
 				    disableCKEditors();
@@ -83,7 +83,9 @@
                     } else {
                         $(select).closest('section').next().next().find('.modal--edit').modal();
                     }
-	            }
+
+                    $('#submit_edit_'+data.id).trigger( "click" );
+                }
 		    });
 	        $(select).val('');
 	        return false;
