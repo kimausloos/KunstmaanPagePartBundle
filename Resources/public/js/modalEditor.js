@@ -25,8 +25,7 @@ function useInlineEditor(id) {
 // This function will change the default editor of a pagepart to a modal editor.
 function useModalEditor(id) {
     // disable the CKEditors
-    // This has to be done every time the editor type is switched because if not re-enabled, the CKEditor won't work
-    disableCKEditors();
+
 
     // check if modal editor is already in use
     if ($('#submit_edit_'+id).attr('data-toggle')) {
@@ -64,8 +63,12 @@ function useModalEditor(id) {
                 + '</div>';
     parent.html(newContent);
 
+
+
     // re-enable the CKEditors
+    // This has to be done every time the editor type is switched because if not re-enabled, the CKEditor won't work
     enableCKEditors();
+    $('#form_pagepartadmin_'+ id +' .input .cke_ltr:last-child').remove();
 }
 
 // This function will close the modal editor.
@@ -118,21 +121,21 @@ function renderPagepart(id) {
         dataType: "html",
         success: function(response) {
             // get the pagepart preview div
-            var parent = $('#'+id+'_view');
+            var view = $('#'+id+'_view');
 
             // Some checks here: a header pagepart is inserted directly in the preview div, link and text are rendered in a sub-div or paragraph.
-            if (parent.children().children().length > 0) {
+            if (view.children().children().length > 0) {
                 // if 2-level view: insert the rendered template in the lowest
                 $('#'+id+'_view > * > *:first-child').html(response);
-            } else if (parent.children().length > 0) {
+            } else if (view.children().length > 0) {
                 // if 1-level view: insert the rendered template there
                 $('#'+id+'_view > *:first-child').html(response);
             } else {
                 // if no children: just insert the rendered template directly in the view div
-                parent.html(response);
+                view.html(response);
             }
             // opening the modal editor hides the preview div, so show it again
-            parent.attr('style', '');
+            view.attr('style', '');
         }
     });
 }
