@@ -89,7 +89,5 @@ class PagePartAdminController extends Controller
             );
 
         return new JsonResponse($return, 200, array('Content-Type' => 'application/json'));
-
-
     }
 }
