@@ -89,11 +89,17 @@ $(document).ready(function() {
     // get the pagepart id from twig
     var id = {{ id }};
 
-    // get the width of the pagepart
-    var width = $('#pagepart_'+id).width();
-    if (width < 500) {
-       useModal(id);
-    }
+    // set the behaviour of the edit button
+    $('#submit_edit_'+id).click(function() {
+        var width = $('#pagepart_'+id).width();
+        if (width < 500) {
+            useModalEditor(id);
+        } else {
+            useInlineEditor(id);
+        }
+    });
+
+    // TODO: creating a new pagepart
 
 });
 </script>
