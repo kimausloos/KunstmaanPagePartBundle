@@ -1,4 +1,3 @@
-
 // This function will use the inline editor
 // TODO: build in preview support for inline editor like with the modal editor (OK button and re-render pagepart?)
 function useInlineEditor(id) {
@@ -24,9 +23,6 @@ function useInlineEditor(id) {
 
 // This function will change the default editor of a pagepart to a modal editor.
 function useModalEditor(id) {
-    // disable the CKEditors
-
-
     // check if modal editor is already in use
     if ($('#submit_edit_'+id).attr('data-toggle')) {
         return PagePartEditor.editPagepart(id);
@@ -63,8 +59,6 @@ function useModalEditor(id) {
                 + '</div>';
     parent.html(newContent);
 
-
-
     // re-enable the CKEditors
     // This has to be done every time the editor type is switched because if not re-enabled, the CKEditor won't work
     enableCKEditors();
@@ -79,7 +73,6 @@ function closeModalEditor(id) {
     // hide the modal editor
     $('#edit-pagepart-modal'+id).modal("hide");
 }
-
 
 // This function will take the data from the modal form and make an ajax call to render a pagepart template with the new data.
 // This data is then inserted back into the pagepart preview. It's not saved however untill the user presses the "save" button.
