@@ -31,21 +31,22 @@ function useModalEditor(id) {
     // change the edit button attributes and behaviour
     $('#submit_edit_'+id).attr('data-toggle', "modal");
     $('#submit_edit_'+id).attr('data-target', "#edit-pagepart-modal"+id);
+    $('#submit_edit_'+id).attr('data-backdrop', "static");
     $('#submit_edit_'+id).click(function() {
         var parent = $('#'+id+'_view');
         parent.attr('style', '');
     });
 
     // some data
-    var parent = $('#'+id+'_edit');
-    content = parent.html();
-    pagepartType = $('#pagepart_'+id).attr('data-pagepart-type');
+    var editView = $('#'+id+'_edit');
+    var content = editView.html();
+    var pagepartType = $('#pagepart_'+id).attr('data-pagepart-type');
 
     // set the content of the edit view to a modal editor
     var newContent = ''
-                + '<div id="edit-pagepart-modal'+id+'" class="modal modal--edit hide fade">'
+                + '<div id="edit-pagepart-modal'+id+'" class="modal modal--edit" style="display:block;">'
                 + '<div class="modal-header">'
-                +    '<button class="close" data-dismiss="modal">&times;</button>'
+                +    '<button class="close" onClick="renderPagepart(\''+id+'\')" data-dismiss="modal">&times;</button>'
                 +    "<h3>Edit '"+pagepartType+"'</h3>"
                 + '</div>'
                 + '<div class="modal-body">'
@@ -57,13 +58,15 @@ function useModalEditor(id) {
                 +    '</div>'
                 + '</div>'
                 + '</div>';
-    parent.html(newContent);
+    editView.html(newContent);
 
     // re-enable the CKEditors
     // This has to be done every time the editor type is switched because if not re-enabled, the CKEditor won't work
     enableCKEditors();
     $('#form_pagepartadmin_'+ id +' .input .cke_ltr:last-child').remove();
 }
+
+
 
 // This function will close the modal editor.
 function closeModalEditor(id) {
