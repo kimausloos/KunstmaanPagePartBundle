@@ -66,8 +66,6 @@ function useModalEditor(id) {
     $('#form_pagepartadmin_'+ id +' .input .cke_ltr:last-child').remove();
 }
 
-
-
 // This function will close the modal editor.
 function closeModalEditor(id) {
     // on closing the modal editor, the pagepart has to re-render with the updated information
