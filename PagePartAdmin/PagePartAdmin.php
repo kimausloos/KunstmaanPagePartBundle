@@ -4,7 +4,6 @@ namespace Kunstmaan\PagePartBundle\PagePartAdmin;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 
 use Kunstmaan\AdminBundle\Entity\AbstractEntity;
@@ -15,7 +14,6 @@ use Kunstmaan\PagePartBundle\Helper\HasPagePartsInterface;
 use Kunstmaan\UtilitiesBundle\Helper\ClassLookup;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\Bundle\DoctrineBundle\Registry;
 
 /**
  * PagePartAdmin
@@ -83,10 +81,6 @@ class PagePartAdmin
             } else {
                 $this->context = "main";
             }
-        }
-        $this->pagepartmap = array();
-        foreach ($this->getPagePartRefs() as $pagepartref) {
-            $this->pagepartmap[$pagepartref->getId()] = $this->getPagePart($pagepartref);
         }
     }
 
@@ -228,8 +222,6 @@ class PagePartAdmin
         $possiblePPTypes = $this->configurator->getPossiblePagePartTypes();
         $result = array();
 
-        /** @var EntityManager $em  */
-        $em = $this->em;
         // filter page part types that can only be added x times to the page.
         // to achieve this, provide a 'pagelimit' parameter when adding the pp type in your PagePartAdminConfiguration
         if (!empty($possiblePPTypes)) {
@@ -237,7 +229,7 @@ class PagePartAdmin
                 if (array_key_exists('pagelimit', $possibleTypeData)) {
                     $pageLimit = $possibleTypeData['pagelimit'];
                     /** @var PagePartRefRepository $entityRepository  */
-                    $entityRepository = $em->getRepository('KunstmaanPagePartBundle:PagePartRef');
+                    $entityRepository = $this->em->getRepository('KunstmaanPagePartBundle:PagePartRef');
                     $formPPCount = $entityRepository->countPagePartsOfType($this->page, $possibleTypeData['class'], $this->configurator->getContext());
                     if ($formPPCount < $pageLimit) {
                         $result[] = $possibleTypeData;
@@ -264,6 +256,12 @@ class PagePartAdmin
      */
     public function getPagePartMap()
     {
+        if (empty($this->pagepartmap)) {
+            foreach ($this->getPagePartRefs() as $pagePartRef) {
+                $this->pagepartmap[$pagePartRef->getId()] = $this->getPagePart($pagePartRef);
+            }
+        }
+
         return $this->pagepartmap;
     }
 

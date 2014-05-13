@@ -29,7 +29,7 @@ class PagePartAdminTwigExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            'pagepartadmin_widget'  => new \Twig_Function_Method($this, 'renderWidget', array('is_safe' => array('html'))),
+            'pagepartadmin_widget' => new \Twig_Function_Method($this, 'renderWidget', array('is_safe' => array('html'))),
         );
     }
 
@@ -46,20 +46,27 @@ class PagePartAdminTwigExtension extends \Twig_Extension
      *
      *     {{ pagepartadmin_widget(ppAdmin, {'separator': '+++++'}) }}
      *
-     * @param PagePartAdmin $ppAdmin    The pagepart admin to render
-     * @param Form          $form       The form
+     * @param PagePartAdmin $ppAdmin The pagepart admin to render
+     * @param Form          $form The form
      * @param array         $parameters Additional variables passed to the template
      *
      * @return string The html markup
      */
-    public function renderWidget(PagePartAdmin $ppAdmin , $form = null , array $parameters = array())
+    public function renderWidget(PagePartAdmin $ppAdmin, $form = null, array $parameters = array())
     {
-        $template = $this->environment->loadTemplate("KunstmaanPagePartBundle:PagePartAdminTwigExtension:widget.html.twig");
+        $template = $this->environment->loadTemplate(
+            "KunstmaanPagePartBundle:PagePartAdminTwigExtension:widget.html.twig"
+        );
 
-        return $template->render(array_merge($parameters, array(
-            'pagepartadmin' => $ppAdmin,
-            'form' => $form
-        )));
+        return $template->render(
+            array_merge(
+                $parameters,
+                array(
+                    'pagepartadmin' => $ppAdmin,
+                    'form'          => $form
+                )
+            )
+        );
     }
 
     /**

@@ -1,18 +1,12 @@
 parameters:
-#    kunstmaan_k_page_part.example.class: Kunstmaan\PagePartBundle\Example
+    kunstmaan_pageparts.pagetemplate_config.reader.class: Kunstmaan\PagePartBundle\Helper\PageTemplateConfigurationReader
+    kunstmaan_pageparts.pagetemplate_config.repository.class: Kunstmaan\PagePartBundle\Repository\PageTemplateConfigurationRepository
+    kunstmaan_pageparts.pagetemplate.service.class: Kunstmaan\PagePartBundle\Service\PageTemplateService
+    kunstmaan_pageparts.pagepart_config.reader.class: Kunstmaan\PagePartBundle\Helper\PagePartConfigurationReader
+    kunstmaan_pageparts.pagepart.service.class: Kunstmaan\PagePartBundle\Service\PagePartService
 
 services:
-#    kunstmaan_k_page_part.example:
-#        class: %kunstmaan_k_page_part.example.class%
-#        arguments: [@service_id, "plain_value", %parameter%]
-    kunstmaan_pagepart.pageparts:
-        class: Kunstmaan\PagePartBundle\PagePartAdmin\Builder
-
-    kunstmaan_pagepartadmin.factory:
-        class: Kunstmaan\PagePartBundle\PagePartAdmin\PagePartAdminFactory
-        arguments: ['@service_container']
-
-    kunstmaan_pagepartadmin.twig.extension:
+    kunstmaan_pageparts.admin.twig.extension:
         class: Kunstmaan\PagePartBundle\Twig\Extension\PagePartAdminTwigExtension
         tags:
             -  { name: twig.extension }
@@ -24,27 +18,51 @@ services:
         tags:
             - { name: twig.extension }
             
-    kunstmaan_pagetemplate.twig.extension:
-        class: Kunstmaan\PagePartBundle\Twig\Extension\PageTemplateTwigExtension
-        arguments:
-            - "@doctrine.orm.entity_manager"
-            - "@kernel"
-        tags:
-            - { name: twig.extension }
-
     kunstmaan_pageparts.pagepart_creator_service:
             class: Kunstmaan\PagePartBundle\Helper\Services\PagePartCreatorService
             calls:
                 - [ setEntityManager, [ "@doctrine.orm.entity_manager" ] ]
 
-    kunstmaan_pageparts.edit_node.listener:
-        class: Kunstmaan\PagePartBundle\EventListener\NodeListener
-        arguments: ["@doctrine.orm.entity_manager", "@kernel", "@form.factory", "@kunstmaan_pagepartadmin.factory"]
-        tags:
-            - { name: kernel.event_listener, event: kunstmaan_node.adaptForm, method: adaptForm }
+    kunstmaan_pageparts.pagetemplate_config.reader:
+        class: %kunstmaan_pageparts.pagetemplate_config.reader.class%
+        arguments: ["@kernel"]
+
+    kunstmaan_pageparts.pagetemplate_config.repository:
+        class:            "%kunstmaan_pageparts.pagetemplate_config.repository.class%"
+        factory_service:  "doctrine.orm.entity_manager"
+        factory_method:   getRepository
+        arguments:        ["KunstmaanPagePartBundle:PageTemplateConfiguration"]
+
+    kunstmaan_pageparts.pagetemplate.service:
+        class: %kunstmaan_pageparts.pagetemplate.service.class%
+        arguments:
+          - "@kunstmaan_pageparts.pagetemplate_config.repository"
+          - "@kunstmaan_pageparts.pagetemplate_config.reader"
+
+    kunstmaan_pageparts.pagepart_config.reader:
+        class: %kunstmaan_pageparts.pagepart_config.reader.class%
+        arguments: ["@kernel"]
+
+    kunstmaan_pageparts.pagepart.service:
+        class: %kunstmaan_pageparts.pagepart.service.class%
+        arguments:
+          - "@service_container"
+          - "@kunstmaan_pageparts.pagepart_config.reader"
 
     kunstmaan_pageparts.clone.listener:
         class: Kunstmaan\PagePartBundle\EventListener\CloneListener
-        arguments: ["@doctrine.orm.entity_manager", "@kernel"]
+        arguments: ["@doctrine.orm.entity_manager", "@kunstmaan_pageparts.pagepart.service", "@kunstmaan_pageparts.pagetemplate.service"]
         tags:
             - { name: kernel.event_listener, event: kunstmaan_admin.postDeepCloneAndSave, method: postDeepCloneAndSave }
+
+    kunstmaan_pageparts.edit_node.listener:
+        class: Kunstmaan\PagePartBundle\EventListener\NodeListener
+        arguments: ["@form.factory", "@kunstmaan_pageparts.pagepart.service", "@kunstmaan_pageparts.pagetemplate.service"]
+        tags:
+            - { name: kernel.event_listener, event: kunstmaan_node.adaptForm, method: adaptForm }
+
+    kunstmaan_pageparts.template.twig.extension:
+        class: Kunstmaan\PagePartBundle\Twig\Extension\PageTemplateTwigExtension
+        arguments: ["@kunstmaan_pageparts.pagetemplate.service"]
+        tags:
+            - { name: twig.extension }

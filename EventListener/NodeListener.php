@@ -2,21 +2,16 @@
 
 namespace Kunstmaan\PagePartBundle\EventListener;
 
-use Doctrine\ORM\EntityManager;
-
-use Symfony\Component\Form\FormFactoryInterface;
-
-use Kunstmaan\NodeBundle\Event\AdaptFormEvent;
-use Kunstmaan\AdminBundle\Helper\FormWidgets\Tabs\Tab;
 use Kunstmaan\AdminBundle\Helper\FormWidgets\ListWidget;
-use Kunstmaan\PagePartBundle\PagePartAdmin\PagePartAdminFactory;
+use Kunstmaan\AdminBundle\Helper\FormWidgets\Tabs\Tab;
+use Kunstmaan\NodeBundle\Event\AdaptFormEvent;
 use Kunstmaan\PagePartBundle\Helper\HasPagePartsInterface;
 use Kunstmaan\PagePartBundle\Helper\HasPageTemplateInterface;
-use Kunstmaan\PagePartBundle\Helper\FormWidgets\PageTemplateWidget;
 use Kunstmaan\PagePartBundle\Helper\FormWidgets\PagePartWidget;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Kunstmaan\PagePartBundle\Helper\PagePartConfigurationReader;
-use Kunstmaan\PagePartBundle\PagePartAdmin\AbstractPagePartAdminConfigurator;
+use Kunstmaan\PagePartBundle\Helper\FormWidgets\PageTemplateWidget;
+use Kunstmaan\PagePartBundle\Service\PagePartServiceInterface;
+use Kunstmaan\PagePartBundle\Service\PageTemplateServiceInterface;
+use Symfony\Component\Form\FormFactoryInterface;
 
 /**
  * NodeListener
@@ -25,37 +20,33 @@ class NodeListener
 {
 
     /**
-     * @var EntityManager
-     */
-    private $em;
-
-    /**
      * @var FormFactoryInterface
      */
     private $formFactory;
 
     /**
-     * @var KernelInterface
+     * @var PageTemplateServiceInterface
      */
-    private $kernel;
+    private $pageTemplateService;
 
     /**
-     * @var PagePartAdminFactory
+     * @var PagePartServiceInterface
      */
-    private $pagePartAdminFactory;
+    private $pagePartService;
 
     /**
-     * @param EntityManager        $em                   The entity manager
-     * @param KernelInterface      $kernel               The kernel
-     * @param FormFactoryInterface $formFactory          The form factory
-     * @param PagePartAdminFactory $pagePartAdminFactory The page part admin factory
+     * @param FormFactoryInterface         $formFactory         The form factory
+     * @param PagePartServiceInterface     $pagePartService     The page part manager
+     * @param PageTemplateServiceInterface $pageTemplateService The page template manager
      */
-    public function __construct(EntityManager $em, KernelInterface $kernel, FormFactoryInterface $formFactory, PagePartAdminFactory $pagePartAdminFactory)
-    {
-        $this->em = $em;
-        $this->formFactory = $formFactory;
-        $this->kernel = $kernel;
-        $this->pagePartAdminFactory = $pagePartAdminFactory;
+    public function __construct(
+        FormFactoryInterface $formFactory,
+        PagePartServiceInterface $pagePartService,
+        pageTemplateServiceInterface $pageTemplateService
+    ) {
+        $this->formFactory         = $formFactory;
+        $this->pagePartService     = $pagePartService;
+        $this->pageTemplateService = $pageTemplateService;
     }
 
     /**
@@ -63,43 +54,81 @@ class NodeListener
      */
     public function adaptForm(AdaptFormEvent $event)
     {
-        $page = $event->getPage();
+        $page    = $event->getPage();
         $tabPane = $event->getTabPane();
 
+        $pagePartAdminConfigurators = $this->pagePartService->getPagePartAdminConfigurators($page);
         if ($page instanceof HasPageTemplateInterface) {
-            $pageTemplateWidget = new PageTemplateWidget($page, $event->getRequest(), $this->em, $this->kernel, $this->formFactory, $this->pagePartAdminFactory);
-            /* @var Tab $propertiesTab */
-            $propertiesTab = $tabPane->getTabByTitle('Properties');
-            if (!is_null($propertiesTab)) {
-                $propertiesWidget = $propertiesTab->getWidget();
-                $tabPane->removeTab($propertiesTab);
-                $tabPane->addTab(new Tab("Content", new ListWidget(array($propertiesWidget, $pageTemplateWidget))), 0);
-            } else {
-                $tabPane->addTab(new Tab("Content", $pageTemplateWidget), 0);
-            }
-        } else if ($page instanceof HasPagePartsInterface) {
-            /* @var HasPagePartsInterface $page */
-            $pagePartConfigurationReader = new PagePartConfigurationReader($this->kernel);
-            $pagePartAdminConfigurators = $pagePartConfigurationReader->getPagePartAdminConfigurators($page);
+            $this->addPageTemplateWidget($event, $page, $tabPane);
+        } elseif ($page instanceof HasPagePartsInterface) {
+            $this->addPagePartWidgets($event, $pagePartAdminConfigurators, $tabPane);
+        }
+    }
 
-            foreach ($pagePartAdminConfigurators as $index => $pagePartAdminConfiguration) {
-                $pagePartWidget = new PagePartWidget($page, $event->getRequest(), $this->em, $pagePartAdminConfiguration, $this->formFactory, $this->pagePartAdminFactory);
-                if ($index == 0) {
-                    /* @var Tab $propertiesTab */
-                    $propertiesTab = $tabPane->getTabByTitle('Properties');
+    /**
+     * @param AdaptFormEvent $event
+     * @param                $page
+     * @param                $tabPane
+     */
+    private function addPageTemplateWidget(AdaptFormEvent $event, $page, $tabPane)
+    {
+        $pageTemplateWidget = new PageTemplateWidget(
+            $page,
+            $event->getRequest(),
+            $this->pageTemplateService,
+            $this->pagePartService,
+            $this->formFactory
+        );
+        /* @var Tab $propertiesTab */
+        $propertiesTab = $tabPane->getTabByTitle('Properties');
+        if (!is_null($propertiesTab)) {
+            $propertiesWidget = $propertiesTab->getWidget();
+            $tabPane->removeTab($propertiesTab);
+            $tabPane->addTab(new Tab('Content', new ListWidget(array($propertiesWidget, $pageTemplateWidget))), 0);
+        } else {
+            $tabPane->addTab(new Tab('Content', $pageTemplateWidget), 0);
+        }
+    }
 
-                    if (!is_null($propertiesTab)) {
-                        $propertiesWidget = $propertiesTab->getWidget();
-                        $tabPane->removeTab($propertiesTab);
-                        $tabPane->addTab(new Tab($pagePartAdminConfiguration->getName(), new ListWidget(array($propertiesWidget, $pagePartWidget))), 0);
+    /**
+     * @param AdaptFormEvent $event
+     * @param                $pagePartAdminConfigurators
+     * @param                $tabPane
+     */
+    private function addPagePartWidgets(AdaptFormEvent $event, $pagePartAdminConfigurators, $tabPane)
+    {
+        foreach ($pagePartAdminConfigurators as $index => $pagePartAdminConfiguration) {
+            $pagePartWidget = new PagePartWidget(
+                $event->getRequest(),
+                $this->formFactory,
+                $this->pagePartAdminFactory);
+            if ($index == 0) {
+                /* @var Tab $propertiesTab */
+                $propertiesTab = $tabPane->getTabByTitle('Properties');
 
-                        continue;
-                    }
+                if (!is_null($propertiesTab)) {
+                    $propertiesWidget = $propertiesTab->getWidget();
+                    $tabPane->removeTab($propertiesTab);
+                    $tabPane->addTab(
+                        new Tab(
+                            $pagePartAdminConfiguration->getName(),
+                            new ListWidget(array(
+                                $propertiesWidget,
+                                $pagePartWidget
+                            ))),
+                        0
+                    );
+
+                    continue;
                 }
-                $tabPane->addTab(new Tab($pagePartAdminConfiguration->getName(), $pagePartWidget), sizeof($tabPane->getTabs()));
-
-
             }
+            $tabPane->addTab(
+                new Tab(
+                    $pagePartAdminConfiguration->getName(),
+                    $pagePartWidget
+                ),
+                sizeof($tabPane->getTabs())
+            );
         }
     }
 

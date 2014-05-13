@@ -10,11 +10,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 use Kunstmaan\AdminBundle\Helper\FormWidgets\FormWidget;
-use Kunstmaan\AdminBundle\Helper\FormWidgets\Tabs\Tab;
-use Kunstmaan\NodeBundle\Entity\HasNodeInterface;
 use Kunstmaan\PagePartBundle\PagePartAdmin\PagePartAdmin;
-use Kunstmaan\PagePartBundle\PagePartAdmin\PagePartAdminFactory;
-use Kunstmaan\PagePartBundle\PagePartAdmin\AbstractPagePartAdminConfigurator;
 
 /**
  * PagePartWidget
@@ -23,29 +19,9 @@ class PagePartWidget extends FormWidget
 {
 
     /**
-     * @var AbstractPagePartAdminConfigurator
-     */
-    protected $pagePartAdminConfigurator;
-
-    /**
-     * @var EntityManager
-     */
-    protected $em;
-
-    /**
-     * @var PagePartAdminFactory
-     */
-    protected $pagePartAdminFactory;
-
-    /**
      * @var PagePartAdmin
      */
     protected $pagePartAdmin;
-
-    /**
-     * @var HasNodeInterface
-     */
-    protected $page;
 
     /**
      * @var FormFactoryInterface
@@ -58,25 +34,17 @@ class PagePartWidget extends FormWidget
     protected $request;
 
     /**
-     * @param HasNodeInterface                  $page                      The page
-     * @param Request                           $request                   The request
-     * @param EntityManager                     $em                        The entity manager
-     * @param AbstractPagePartAdminConfigurator $pagePartAdminConfigurator The page part admin configurator
-     * @param FormFactoryInterface              $formFactory               The form factory
-     * @param PagePartAdminFactory              $pagePartAdminFactory      The page part admin factory
+     * @param Request              $request       The request
+     * @param FormFactoryInterface $formFactory   The form factory
+     * @param PagePartAdmin        $pagePartAdmin The page part admin
      */
-    public function __construct(HasNodeInterface $page, Request $request, EntityManager $em, AbstractPagePartAdminConfigurator $pagePartAdminConfigurator, FormFactoryInterface $formFactory, PagePartAdminFactory $pagePartAdminFactory)
+    public function __construct(Request $request, FormFactoryInterface $formFactory, PagePartAdmin $pagePartAdmin)
     {
         parent::__construct();
 
-        $this->page = $page;
-        $this->em = $em;
-        $this->formFactory = $formFactory;
-        $this->pagePartAdminConfigurator = $pagePartAdminConfigurator;
-        $this->pagePartAdminFactory = $pagePartAdminFactory;
-        $this->request = $request;
-
-        $this->pagePartAdmin = $pagePartAdminFactory->createList($pagePartAdminConfigurator, $em, $page, null);
+        $this->request       = $request;
+        $this->formFactory   = $formFactory;
+        $this->pagePartAdmin = $pagePartAdmin;
     }
 
     /**
@@ -122,7 +90,10 @@ class PagePartWidget extends FormWidget
         $formHelper = $this->getFormHelper();
 
         if (isset($formView['pagepartadmin_' . $this->pagePartAdmin->getContext()])) {
-            $errors = array_merge($errors, $formHelper->getRecursiveErrorMessages($formView['pagepartadmin_' . $this->pagePartAdmin->getContext()]));
+            $errors = array_merge(
+                $errors,
+                $formHelper->getRecursiveErrorMessages($formView['pagepartadmin_' . $this->pagePartAdmin->getContext()])
+            );
         }
 
         return $errors;
@@ -151,7 +122,7 @@ class PagePartWidget extends FormWidget
      */
     public function getExtraParams(Request $request)
     {
-        $params = array();
+        $params       = array();
         $editPagePart = $request->get('edit');
         if (isset($editPagePart)) {
             $params['editpagepart'] = $editPagePart;

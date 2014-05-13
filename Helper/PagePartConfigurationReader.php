@@ -4,16 +4,14 @@ namespace Kunstmaan\PagePartBundle\Helper;
 
 use Kunstmaan\PagePartBundle\PageTemplate\PageTemplate;
 use Symfony\Component\Yaml\Yaml;
-use Kunstmaan\PagePartBundle\PageTemplate\Row;
-use Kunstmaan\PagePartBundle\PageTemplate\Region;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Kunstmaan\FormBundle\Form\AbstractFormPageAdminType;
 use Kunstmaan\PagePartBundle\PagePartAdmin\PagePartAdminConfigurator;
 use Kunstmaan\PagePartBundle\PagePartAdmin\AbstractPagePartAdminConfigurator;
+
 /**
  * PagePartConfigurationReader
  */
-class PagePartConfigurationReader
+class PagePartConfigurationReader implements PagePartConfigurationReaderInterface
 {
 
     private $kernel;
